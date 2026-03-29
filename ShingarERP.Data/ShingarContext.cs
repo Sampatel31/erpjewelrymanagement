@@ -40,6 +40,16 @@ namespace ShingarERP.Data
         public DbSet<JournalEntryLine> JournalEntryLines { get; set; }
         public DbSet<DayBook>          DayBooks         { get; set; }
 
+        // ── Phase 2A: Advanced Multi-Location Inventory ─────────────
+        public DbSet<InventoryLocation>  InventoryLocations  { get; set; }
+        public DbSet<LocationInventory>  LocationInventories { get; set; }
+        public DbSet<StockTransfer>      StockTransfers      { get; set; }
+        public DbSet<ForecastData>       ForecastData        { get; set; }
+        public DbSet<ReorderPoint>       ReorderPoints       { get; set; }
+        public DbSet<BarcodeInfo>        BarcodeInfos        { get; set; }
+        public DbSet<SalesHistory>       SalesHistories      { get; set; }
+        public DbSet<LocationCapacity>   LocationCapacities  { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -236,6 +246,142 @@ namespace ShingarERP.Data
                  .WithMany()
                  .HasForeignKey(x => x.AccountId)
                  .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ── Phase 2A: InventoryLocation ──────────────────────────
+            modelBuilder.Entity<InventoryLocation>(e =>
+            {
+                e.HasIndex(x => x.LocationCode).IsUnique();
+            });
+
+            // ── Phase 2A: LocationInventory ──────────────────────────
+            modelBuilder.Entity<LocationInventory>(e =>
+            {
+                e.HasIndex(x => new { x.LocationId, x.ItemId }).IsUnique();
+                e.Property(x => x.ReservedQuantity).HasPrecision(12, 4);
+
+                e.HasOne(x => x.Location)
+                 .WithMany(l => l.LocationInventories)
+                 .HasForeignKey(x => x.LocationId)
+                 .OnDelete(DeleteBehavior.Restrict);
+
+                e.HasOne(x => x.FinishedGood)
+                 .WithMany()
+                 .HasForeignKey(x => x.ItemId)
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ── Phase 2A: StockTransfer ──────────────────────────────
+            modelBuilder.Entity<StockTransfer>(e =>
+            {
+                e.HasIndex(x => x.TransferNo).IsUnique();
+                e.HasIndex(x => x.Status);
+
+                e.HasOne(x => x.FromLocation)
+                 .WithMany(l => l.TransfersOut)
+                 .HasForeignKey(x => x.FromLocationId)
+                 .OnDelete(DeleteBehavior.Restrict);
+
+                e.HasOne(x => x.ToLocation)
+                 .WithMany(l => l.TransfersIn)
+                 .HasForeignKey(x => x.ToLocationId)
+                 .OnDelete(DeleteBehavior.Restrict);
+
+                e.HasOne(x => x.FinishedGood)
+                 .WithMany()
+                 .HasForeignKey(x => x.ItemId)
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ── Phase 2A: ForecastData ───────────────────────────────
+            modelBuilder.Entity<ForecastData>(e =>
+            {
+                e.HasIndex(x => new { x.ItemId, x.PeriodStart, x.Granularity });
+                e.Property(x => x.ForecastedQuantity).HasPrecision(10, 4);
+                e.Property(x => x.ForecastError).HasPrecision(7, 4);
+
+                e.HasOne(x => x.FinishedGood)
+                 .WithMany()
+                 .HasForeignKey(x => x.ItemId)
+                 .OnDelete(DeleteBehavior.Restrict);
+
+                e.HasOne(x => x.Location)
+                 .WithMany()
+                 .HasForeignKey(x => x.LocationId)
+                 .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            // ── Phase 2A: ReorderPoint ───────────────────────────────
+            modelBuilder.Entity<ReorderPoint>(e =>
+            {
+                e.HasIndex(x => new { x.ItemId, x.LocationId }).IsUnique();
+
+                e.HasOne(x => x.FinishedGood)
+                 .WithMany()
+                 .HasForeignKey(x => x.ItemId)
+                 .OnDelete(DeleteBehavior.Restrict);
+
+                e.HasOne(x => x.Location)
+                 .WithMany(l => l.ReorderPoints)
+                 .HasForeignKey(x => x.LocationId)
+                 .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            // ── Phase 2A: BarcodeInfo ────────────────────────────────
+            modelBuilder.Entity<BarcodeInfo>(e =>
+            {
+                e.HasIndex(x => x.BarcodeValue).IsUnique();
+
+                e.HasOne(x => x.FinishedGood)
+                 .WithMany()
+                 .HasForeignKey(x => x.ItemId)
+                 .OnDelete(DeleteBehavior.SetNull);
+
+                e.HasOne(x => x.Location)
+                 .WithMany()
+                 .HasForeignKey(x => x.LocationId)
+                 .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            // ── Phase 2A: SalesHistory ───────────────────────────────
+            modelBuilder.Entity<SalesHistory>(e =>
+            {
+                e.HasIndex(x => x.InvoiceNo);
+                e.HasIndex(x => x.SaleDate);
+                e.Property(x => x.UnitPrice).HasPrecision(16, 2);
+                e.Property(x => x.TotalAmount).HasPrecision(18, 2);
+                e.Property(x => x.GSTAmount).HasPrecision(18, 2);
+
+                e.HasOne(x => x.FinishedGood)
+                 .WithMany()
+                 .HasForeignKey(x => x.ItemId)
+                 .OnDelete(DeleteBehavior.Restrict);
+
+                e.HasOne(x => x.Location)
+                 .WithMany()
+                 .HasForeignKey(x => x.LocationId)
+                 .OnDelete(DeleteBehavior.Restrict);
+
+                e.HasOne(x => x.Customer)
+                 .WithMany()
+                 .HasForeignKey(x => x.CustomerId)
+                 .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            // ── Phase 2A: LocationCapacity ───────────────────────────
+            modelBuilder.Entity<LocationCapacity>(e =>
+            {
+                e.HasIndex(x => new { x.LocationId, x.CategoryId }).IsUnique();
+
+                e.HasOne(x => x.Location)
+                 .WithMany(l => l.Capacities)
+                 .HasForeignKey(x => x.LocationId)
+                 .OnDelete(DeleteBehavior.Restrict);
+
+                e.HasOne(x => x.Category)
+                 .WithMany()
+                 .HasForeignKey(x => x.CategoryId)
+                 .OnDelete(DeleteBehavior.SetNull);
             });
 
             // ── Seed data ────────────────────────────────────────────
