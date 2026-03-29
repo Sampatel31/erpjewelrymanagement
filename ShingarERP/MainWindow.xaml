@@ -36,7 +36,7 @@
                 <!-- Nav buttons -->
                 <StackPanel DockPanel.Dock="Top" Margin="0,12,0,0">
                     <TextBlock Text="INVENTORY" FontSize="10" Foreground="#64B5F6" FontWeight="Bold"
-                               Margin="16,0,0,4" LetterSpacing="1.5"/>
+                               Margin="16,0,0,4"/>
 
                     <Button Content="🥇  Metal Inventory" Tag="MetalInventory"
                             Style="{StaticResource NavButtonStyle}" Click="NavButton_Click"/>
