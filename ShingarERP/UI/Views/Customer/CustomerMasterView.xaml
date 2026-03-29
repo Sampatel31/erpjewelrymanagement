@@ -1,0 +1,176 @@
+<UserControl x:Class="ShingarERP.UI.Views.Customer.CustomerMasterView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="700" d:DesignWidth="1200"
+             Background="White">
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,12">
+            <TextBlock Text="Customer Master &amp; KYC" FontSize="22" FontWeight="Bold" Foreground="#1F4975"/>
+            <TextBlock Text="Module 15 – Customer profiles, KYC verification, LTV scoring" FontSize="12" Foreground="#666"/>
+        </StackPanel>
+
+        <!-- Search bar -->
+        <Border Grid.Row="1" Background="#F5F5F5" BorderBrush="#E0E0E0" BorderThickness="1"
+                CornerRadius="6" Padding="10,8" Margin="0,0,0,10">
+            <StackPanel Orientation="Horizontal">
+                <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                         Width="280" Margin="0,0,8,0" VerticalContentAlignment="Center"/>
+                <CheckBox Content="KYC Verified Only" IsChecked="{Binding FilterKycVerified}"
+                          VerticalAlignment="Center" Margin="0,0,12,0"/>
+                <Button Content="🔍 Search" Command="{Binding SearchCustomersCommand}"
+                        Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,8,0"/>
+                <Button Content="➕ New Customer" Command="{Binding CancelEditCommand}"
+                        Background="#E8F5E9" BorderBrush="#81C784" Foreground="#1B5E20"/>
+                <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="8,0"/>
+                <TextBlock Text="{Binding TotalCount, StringFormat=Total: {0}}"
+                           VerticalAlignment="Center" Foreground="#555"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Main content -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="320"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Customer DataGrid -->
+            <DataGrid Grid.Column="0" ItemsSource="{Binding Customers}"
+                      SelectedItem="{Binding SelectedCustomer}"
+                      AutoGenerateColumns="False" IsReadOnly="True"
+                      CanUserAddRows="False" GridLinesVisibility="Horizontal"
+                      RowBackground="White" AlternatingRowBackground="#F8FBFF"
+                      Margin="0,0,8,0">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Code"     Binding="{Binding CustomerCode}"  Width="90"/>
+                    <DataGridTextColumn Header="Name"     Binding="{Binding FullName}"       Width="*"/>
+                    <DataGridTextColumn Header="Mobile"   Binding="{Binding Mobile}"         Width="110"/>
+                    <DataGridTextColumn Header="City"     Binding="{Binding City}"           Width="90"/>
+                    <DataGridTextColumn Header="KYC"      Binding="{Binding KYCVerified}"    Width="60">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Style.Triggers>
+                                    <Trigger Property="Text" Value="True">
+                                        <Setter Property="Foreground" Value="Green"/>
+                                        <Setter Property="Text" Value="✓"/>
+                                    </Trigger>
+                                    <Trigger Property="Text" Value="False">
+                                        <Setter Property="Foreground" Value="Red"/>
+                                        <Setter Property="Text" Value="✗"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Header="LTV Score" Binding="{Binding LTVScore, StringFormat=F0}" Width="80"/>
+                    <DataGridTextColumn Header="Purchases" Binding="{Binding TotalPurchaseCount}"       Width="80"/>
+                    <DataGridTextColumn Header="Total Value" Binding="{Binding TotalPurchaseAmount, StringFormat=₹{0:N0}}" Width="100"/>
+                </DataGrid.Columns>
+
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <EventSetter Event="MouseDoubleClick" Handler="DataGridRow_DoubleClick"/>
+                    </Style>
+                </DataGrid.RowStyle>
+            </DataGrid>
+
+            <!-- Customer Form + KYC Panel -->
+            <ScrollViewer Grid.Column="1">
+                <StackPanel Margin="0">
+
+                    <!-- Customer Form -->
+                    <Border BorderBrush="#DDD" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,8">
+                        <StackPanel>
+                            <TextBlock Text="{Binding IsEditMode, Converter={StaticResource BoolToStringConverter},
+                                             ConverterParameter='✏ Edit Customer|➕ New Customer'}"
+                                       FontWeight="Bold" FontSize="13" Margin="0,0,0,10"/>
+
+                            <TextBlock Text="First Name *" FontSize="11"/>
+                            <TextBox Text="{Binding CustomerForm.FirstName, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,6"/>
+
+                            <TextBlock Text="Last Name" FontSize="11"/>
+                            <TextBox Text="{Binding CustomerForm.LastName, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,6"/>
+
+                            <TextBlock Text="Mobile *" FontSize="11"/>
+                            <TextBox Text="{Binding CustomerForm.Mobile, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,6"/>
+
+                            <TextBlock Text="Email" FontSize="11"/>
+                            <TextBox Text="{Binding CustomerForm.Email, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,6"/>
+
+                            <TextBlock Text="City" FontSize="11"/>
+                            <TextBox Text="{Binding CustomerForm.City, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,6"/>
+
+                            <TextBlock Text="State" FontSize="11"/>
+                            <TextBox Text="{Binding CustomerForm.State, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,6"/>
+
+                            <TextBlock Text="PAN" FontSize="11"/>
+                            <TextBox Text="{Binding CustomerForm.PANNumber, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,6"/>
+
+                            <TextBlock Text="Aadhaar (12 digits)" FontSize="11"/>
+                            <TextBox Text="{Binding CustomerForm.AadhaarNumber, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,10"/>
+
+                            <!-- Buttons -->
+                            <StackPanel Orientation="Horizontal">
+                                <Button Content="{Binding IsEditMode, Converter={StaticResource BoolToStringConverter},
+                                               ConverterParameter='Update Customer|Create Customer'}"
+                                        Command="{Binding IsEditMode,
+                                               Converter={StaticResource BoolToCommandConverter},
+                                               ConverterParameter={Binding UpdateCustomerCommand|CreateCustomerCommand}}"
+                                        Style="{StaticResource PrimaryButtonStyle}" Width="140"/>
+                                <Button Content="Cancel" Command="{Binding CancelEditCommand}"
+                                        Margin="8,0,0,0" Width="70"
+                                        Visibility="{Binding IsEditMode, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- KYC Verification Panel -->
+                    <Border BorderBrush="#DDD" BorderThickness="1" CornerRadius="6" Padding="12">
+                        <StackPanel>
+                            <TextBlock Text="🔒 KYC Verification" FontWeight="Bold" FontSize="13" Margin="0,0,0,8"/>
+
+                            <TextBlock Text="Document Type" FontSize="11"/>
+                            <ComboBox SelectedValue="{Binding KycForm.DocumentType}" Margin="0,2,0,6">
+                                <ComboBoxItem Content="Aadhaar"/>
+                                <ComboBoxItem Content="PAN"/>
+                                <ComboBoxItem Content="Passport"/>
+                                <ComboBoxItem Content="DrivingLicense"/>
+                                <ComboBoxItem Content="VoterID"/>
+                            </ComboBox>
+
+                            <TextBlock Text="Document Number" FontSize="11"/>
+                            <TextBox Text="{Binding KycForm.DocumentNumber, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,10"/>
+
+                            <Button Content="Verify KYC" Command="{Binding VerifyKycCommand}"
+                                    Background="#E3F2FD" BorderBrush="#64B5F6" Foreground="#0D47A1"
+                                    HorizontalAlignment="Stretch"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+
+        <!-- Status bar -->
+        <Border Grid.Row="3" Background="#F5F5F5" BorderBrush="#E0E0E0" BorderThickness="0,1,0,0"
+                Padding="8,4" Margin="0,8,0,0">
+            <DockPanel>
+                <ProgressBar IsIndeterminate="{Binding IsBusy}" Width="120" Height="8" VerticalAlignment="Center"
+                             Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}"
+                             DockPanel.Dock="Right" Margin="8,0"/>
+                <TextBlock Text="{Binding StatusMessage}" VerticalAlignment="Center"/>
+            </DockPanel>
+        </Border>
+    </Grid>
+</UserControl>

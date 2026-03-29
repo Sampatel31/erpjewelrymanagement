@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="ShingarERP.Core/ShingarERP.Core.csproj" />
+  <Project Path="ShingarERP.Data/ShingarERP.Data.csproj" />
+  <Project Path="ShingarERP.Services/ShingarERP.Services.csproj" />
+  <Project Path="ShingarERP.Tests/ShingarERP.Tests.csproj" />
+  <Project Path="ShingarERP/ShingarERP.csproj" />
+</Solution>

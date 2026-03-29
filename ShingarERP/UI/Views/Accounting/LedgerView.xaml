@@ -1,0 +1,223 @@
+<UserControl x:Class="ShingarERP.UI.Views.Accounting.LedgerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="700" d:DesignWidth="1200"
+             Background="White">
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title -->
+        <DockPanel Grid.Row="0" LastChildFill="False" Margin="0,0,0,12">
+            <StackPanel DockPanel.Dock="Left">
+                <TextBlock Text="Accounts &amp; Ledger" FontSize="22" FontWeight="Bold" Foreground="#1F4975"/>
+                <TextBlock Text="Module 22 – Double-entry journal, trial balance, Tally export" FontSize="12" Foreground="#666"/>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Tab control -->
+        <TabControl Grid.Row="1" SelectedIndex="0">
+
+            <!-- Accounts Tab -->
+            <TabItem Header="📋 Chart of Accounts">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="260"/>
+                    </Grid.ColumnDefinitions>
+
+                    <DockPanel Grid.Column="0" Margin="0,0,8,0">
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
+                            <Button Content="🔄 Reload" Command="{Binding LoadAccountsCommand}"
+                                    Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,8,0"/>
+                            <TextBlock Text="{Binding Accounts.Count, StringFormat={}{0} accounts}"
+                                       VerticalAlignment="Center" Foreground="#555"/>
+                        </StackPanel>
+                        <DataGrid ItemsSource="{Binding Accounts}"
+                                  SelectedItem="{Binding SelectedAccount}"
+                                  AutoGenerateColumns="False" IsReadOnly="True"
+                                  CanUserAddRows="False" GridLinesVisibility="Horizontal"
+                                  RowBackground="White" AlternatingRowBackground="#F8FBFF">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Code"         Binding="{Binding AccountCode}" Width="80"/>
+                                <DataGridTextColumn Header="Account Name" Binding="{Binding AccountName}" Width="*"/>
+                                <DataGridTextColumn Header="Type"         Binding="{Binding AccountType}" Width="90"/>
+                                <DataGridTextColumn Header="Group"        Binding="{Binding AccountGroup}" Width="90"/>
+                                <DataGridTextColumn Header="Normal Bal."  Binding="{Binding NormalBalance}" Width="80"/>
+                                <DataGridTextColumn Header="Balance (₹)"  Binding="{Binding CurrentBalance, StringFormat=₹{0:N2}}" Width="110"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </DockPanel>
+
+                    <!-- Add Account panel -->
+                    <Border Grid.Column="1" BorderBrush="#DDD" BorderThickness="1" CornerRadius="6" Padding="12" VerticalAlignment="Top">
+                        <StackPanel>
+                            <TextBlock Text="➕ Add Account" FontWeight="Bold" Margin="0,0,0,10"/>
+                            <TextBlock Text="Account Code *" FontSize="11"/>
+                            <TextBox x:Name="NewAccountCode" Margin="0,2,0,6"/>
+                            <TextBlock Text="Account Name *" FontSize="11"/>
+                            <TextBox x:Name="NewAccountName" Margin="0,2,0,6"/>
+                            <TextBlock Text="Account Type *" FontSize="11"/>
+                            <ComboBox x:Name="NewAccountType" Margin="0,2,0,6">
+                                <ComboBoxItem Content="Asset"/>
+                                <ComboBoxItem Content="Liability"/>
+                                <ComboBoxItem Content="Equity"/>
+                                <ComboBoxItem Content="Revenue"/>
+                                <ComboBoxItem Content="Expense"/>
+                            </ComboBox>
+                            <TextBlock Text="Normal Balance" FontSize="11"/>
+                            <ComboBox x:Name="NewAccountNormal" Margin="0,2,0,10">
+                                <ComboBoxItem Content="Dr"/>
+                                <ComboBoxItem Content="Cr"/>
+                            </ComboBox>
+                            <Button Content="Create Account" HorizontalAlignment="Stretch"
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    Click="CreateAccount_Click"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- Journal Entry Tab -->
+            <TabItem Header="📝 Journal Entry">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="340"/>
+                    </Grid.ColumnDefinitions>
+
+                    <DockPanel Grid.Column="0" Margin="0,0,8,0">
+                        <TextBlock DockPanel.Dock="Top" Text="Recent Journal Entries" FontWeight="Bold" Margin="0,0,0,8"/>
+                        <DataGrid ItemsSource="{Binding JournalEntries}"
+                                  SelectedItem="{Binding SelectedEntry}"
+                                  AutoGenerateColumns="False" IsReadOnly="True"
+                                  CanUserAddRows="False" GridLinesVisibility="Horizontal"
+                                  RowBackground="White" AlternatingRowBackground="#F8FBFF">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Voucher No"  Binding="{Binding VoucherNo}"    Width="130"/>
+                                <DataGridTextColumn Header="Type"        Binding="{Binding VoucherType}"  Width="80"/>
+                                <DataGridTextColumn Header="Date"        Binding="{Binding VoucherDate, StringFormat=dd-MM-yyyy}" Width="90"/>
+                                <DataGridTextColumn Header="Narration"   Binding="{Binding Narration}"    Width="*"/>
+                                <DataGridTextColumn Header="Debit (₹)"   Binding="{Binding TotalDebit, StringFormat=₹{0:N2}}"  Width="110"/>
+                                <DataGridTextColumn Header="Credit (₹)"  Binding="{Binding TotalCredit, StringFormat=₹{0:N2}}" Width="110"/>
+                                <DataGridTextColumn Header="Posted"      Binding="{Binding IsPosted}"     Width="60"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </DockPanel>
+
+                    <!-- New journal entry panel -->
+                    <Border Grid.Column="1" BorderBrush="#DDD" BorderThickness="1" CornerRadius="6" Padding="12">
+                        <StackPanel>
+                            <TextBlock Text="➕ New Journal Entry" FontWeight="Bold" Margin="0,0,0,8"/>
+
+                            <TextBlock Text="Voucher Type" FontSize="11"/>
+                            <ComboBox SelectedValue="{Binding NewEntryRequest.VoucherType}" Margin="0,2,0,6">
+                                <ComboBoxItem Content="Journal"/>
+                                <ComboBoxItem Content="Cash"/>
+                                <ComboBoxItem Content="Bank"/>
+                                <ComboBoxItem Content="Sales"/>
+                                <ComboBoxItem Content="Purchase"/>
+                            </ComboBox>
+
+                            <TextBlock Text="Date" FontSize="11"/>
+                            <DatePicker SelectedDate="{Binding NewEntryRequest.VoucherDate}" Margin="0,2,0,6"/>
+
+                            <TextBlock Text="Narration" FontSize="11"/>
+                            <TextBox Text="{Binding NewEntryRequest.Narration, UpdateSourceTrigger=PropertyChanged}"
+                                     Margin="0,2,0,8" Height="50" AcceptsReturn="True" TextWrapping="Wrap"/>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                <TextBlock Text="Entry Lines" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                <Button Content="+ Add Line" Command="{Binding AddEntryLineCommand}"
+                                        Margin="8,0,0,0" Padding="6,2"/>
+                            </StackPanel>
+
+                            <ItemsControl ItemsSource="{Binding NewEntryLines}" Margin="0,0,0,8">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="#EEE" BorderThickness="1" Padding="6" Margin="0,0,0,4" CornerRadius="4">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel Grid.Column="0">
+                                                    <TextBox Text="{Binding AccountId, UpdateSourceTrigger=PropertyChanged}"
+                                                             Tag="Account ID" FontSize="11" Margin="0,0,0,2"/>
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition/>
+                                                            <ColumnDefinition/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBox Grid.Column="0" Text="{Binding DebitAmount, UpdateSourceTrigger=PropertyChanged}"
+                                                                 Tag="Dr" FontSize="11" Margin="0,0,2,0"/>
+                                                        <TextBox Grid.Column="1" Text="{Binding CreditAmount, UpdateSourceTrigger=PropertyChanged}"
+                                                                 Tag="Cr" FontSize="11"/>
+                                                    </Grid>
+                                                </StackPanel>
+                                                <Button Grid.Column="1" Content="✕" Foreground="Red" Margin="4,0,0,0"
+                                                        Command="{Binding DataContext.RemoveEntryLineCommand,
+                                                                          RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                        CommandParameter="{Binding}"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <Button Content="Post Entry" Command="{Binding PostJournalEntryCommand}"
+                                    Style="{StaticResource PrimaryButtonStyle}" HorizontalAlignment="Stretch"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- Trial Balance Tab -->
+            <TabItem Header="📊 Trial Balance">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
+                        <TextBlock Text="As of Date:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <DatePicker SelectedDate="{Binding TrialBalanceAsOf}" Width="140" Margin="0,0,8,0"/>
+                        <Button Content="Generate" Command="{Binding LoadTrialBalanceCommand}"
+                                Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,8,0"/>
+                        <Button Content="📤 Export Tally XML" Command="{Binding ExportTallyXmlCommand}"
+                                Background="#E8F5E9" BorderBrush="#81C784" Foreground="#1B5E20" Margin="0,0,8,0"/>
+                        <TextBlock Text="{Binding TrialBalance.Count, StringFormat={}{0} accounts}"
+                                   VerticalAlignment="Center" Foreground="#555"/>
+                    </StackPanel>
+                    <DataGrid ItemsSource="{Binding TrialBalance}"
+                              AutoGenerateColumns="False" IsReadOnly="True"
+                              CanUserAddRows="False" GridLinesVisibility="Horizontal"
+                              RowBackground="White" AlternatingRowBackground="#F8FBFF">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Code"      Binding="{Binding AccountCode}" Width="80"/>
+                            <DataGridTextColumn Header="Account"   Binding="{Binding AccountName}" Width="*"/>
+                            <DataGridTextColumn Header="Type"      Binding="{Binding AccountType}" Width="90"/>
+                            <DataGridTextColumn Header="Total Dr"  Binding="{Binding TotalDebit, StringFormat=₹{0:N2}}"  Width="120"/>
+                            <DataGridTextColumn Header="Total Cr"  Binding="{Binding TotalCredit, StringFormat=₹{0:N2}}" Width="120"/>
+                            <DataGridTextColumn Header="Net Balance" Binding="{Binding NetBalance, StringFormat=₹{0:N2}}" Width="120"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </TabItem>
+        </TabControl>
+
+        <!-- Status bar -->
+        <Border Grid.Row="2" Background="#F5F5F5" BorderBrush="#E0E0E0" BorderThickness="0,1,0,0"
+                Padding="8,4" Margin="0,8,0,0">
+            <DockPanel>
+                <ProgressBar IsIndeterminate="{Binding IsBusy}" Width="120" Height="8" VerticalAlignment="Center"
+                             Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}"
+                             DockPanel.Dock="Right" Margin="8,0"/>
+                <TextBlock Text="{Binding StatusMessage}" VerticalAlignment="Center"/>
+            </DockPanel>
+        </Border>
+    </Grid>
+</UserControl>

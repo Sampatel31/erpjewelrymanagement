@@ -1,0 +1,169 @@
+<UserControl x:Class="ShingarERP.UI.Views.Inventory.FinishedGoodsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="700" d:DesignWidth="1200"
+             Background="White">
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,12">
+            <TextBlock Text="Finished Goods Inventory" FontSize="22" FontWeight="Bold" Foreground="#1F4975"/>
+            <TextBlock Text="Module 02 – SKU management, multi-location stock, aging analysis" FontSize="12" Foreground="#666"/>
+        </StackPanel>
+
+        <!-- Search & Filter bar -->
+        <Border Grid.Row="1" Background="#F5F5F5" BorderBrush="#E0E0E0" BorderThickness="1"
+                CornerRadius="6" Padding="10,8" Margin="0,0,0,10">
+            <StackPanel Orientation="Horizontal">
+                <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                         Width="220" Margin="0,0,8,0" VerticalContentAlignment="Center">
+                    <TextBox.Style>
+                        <Style TargetType="TextBox">
+                            <Setter Property="Tag" Value="🔍 Search SKU, Name, Barcode…"/>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
+
+                <ComboBox SelectedValue="{Binding SelectedLocation}" Width="140" Margin="0,0,8,0">
+                    <ComboBoxItem Content="All Locations" Tag=""/>
+                    <ComboBoxItem Content="Showroom"/>
+                    <ComboBoxItem Content="Safe"/>
+                    <ComboBoxItem Content="Locker"/>
+                    <ComboBoxItem Content="Counter"/>
+                    <ComboBoxItem Content="Vault"/>
+                </ComboBox>
+
+                <Button Content="🔍 Search" Command="{Binding SearchCommand}"
+                        Style="{StaticResource PrimaryButtonStyle}" Margin="0,0,8,0"/>
+                <Button Content="📦 All Items" Command="{Binding LoadItemsCommand}"
+                        Margin="0,0,8,0"/>
+                <Button Content="⏰ Aging Stock (180d)" Command="{Binding LoadAgingStockCommand}"
+                        Background="#FFF3E0" BorderBrush="#FFB74D" Foreground="#E65100"/>
+
+                <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="8,0"/>
+
+                <TextBlock Text="{Binding TotalCount, StringFormat=Total: {0} items}"
+                           VerticalAlignment="Center" Foreground="#555"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Data Grid + New Item Form -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="280"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Inventory DataGrid -->
+            <DataGrid Grid.Column="0" ItemsSource="{Binding FinishedGoods}"
+                      SelectedItem="{Binding SelectedItem}"
+                      AutoGenerateColumns="False" IsReadOnly="True"
+                      CanUserAddRows="False" GridLinesVisibility="Horizontal"
+                      RowBackground="White" AlternatingRowBackground="#F8FBFF"
+                      Margin="0,0,8,0">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="SKU"        Binding="{Binding SKU}"            Width="110"/>
+                    <DataGridTextColumn Header="Item Name"  Binding="{Binding ItemName}"        Width="*"/>
+                    <DataGridTextColumn Header="Category"   Binding="{Binding CategoryName}"    Width="90"/>
+                    <DataGridTextColumn Header="Metal"      Binding="{Binding MetalName}"       Width="80"/>
+                    <DataGridTextColumn Header="Gross (g)"  Binding="{Binding GrossWeight, StringFormat=F3}" Width="75"/>
+                    <DataGridTextColumn Header="Net (g)"    Binding="{Binding NetWeight, StringFormat=F3}"   Width="75"/>
+                    <DataGridTextColumn Header="Location"   Binding="{Binding StockLocation}"   Width="85"/>
+                    <DataGridTextColumn Header="Qty"        Binding="{Binding StockQuantity}"   Width="50"/>
+                    <DataGridTextColumn Header="Sale Price" Binding="{Binding SalePrice, StringFormat=₹{0:N2}}" Width="100"/>
+                    <DataGridTextColumn Header="Barcode"    Binding="{Binding BarcodeNumber}"   Width="110"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <!-- New Item Form -->
+            <Border Grid.Column="1" BorderBrush="#DDD" BorderThickness="1" CornerRadius="6" Padding="12">
+                <ScrollViewer>
+                    <StackPanel>
+                        <TextBlock Text="➕ Add New Item" FontWeight="Bold" FontSize="13" Margin="0,0,0,10"/>
+
+                        <TextBlock Text="SKU *" FontSize="11"/>
+                        <TextBox Text="{Binding NewItemRequest.SKU, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,6"/>
+
+                        <TextBlock Text="Item Name *" FontSize="11"/>
+                        <TextBox Text="{Binding NewItemRequest.ItemName, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,6"/>
+
+                        <TextBlock Text="Category ID *" FontSize="11"/>
+                        <TextBox Text="{Binding NewItemRequest.CategoryId, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,6"/>
+
+                        <TextBlock Text="Metal ID *" FontSize="11"/>
+                        <TextBox Text="{Binding NewItemRequest.MetalId, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,6"/>
+
+                        <TextBlock Text="Gross Weight (g) *" FontSize="11"/>
+                        <TextBox Text="{Binding NewItemRequest.GrossWeight, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,6"/>
+
+                        <TextBlock Text="Net Weight (g) *" FontSize="11"/>
+                        <TextBox Text="{Binding NewItemRequest.NetWeight, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,6"/>
+
+                        <TextBlock Text="Making Charge/g (₹)" FontSize="11"/>
+                        <TextBox Text="{Binding NewItemRequest.MakingChargePerGram, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,6"/>
+
+                        <TextBlock Text="Sale Price (₹) *" FontSize="11"/>
+                        <TextBox Text="{Binding NewItemRequest.SalePrice, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,6"/>
+
+                        <TextBlock Text="Barcode" FontSize="11"/>
+                        <TextBox Text="{Binding NewItemRequest.BarcodeNumber, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,6"/>
+
+                        <TextBlock Text="Location" FontSize="11"/>
+                        <ComboBox SelectedValue="{Binding NewItemRequest.StockLocation}" Margin="0,2,0,6">
+                            <ComboBoxItem Content="Showroom"/>
+                            <ComboBoxItem Content="Safe"/>
+                            <ComboBoxItem Content="Locker"/>
+                            <ComboBoxItem Content="Counter"/>
+                            <ComboBoxItem Content="Vault"/>
+                        </ComboBox>
+
+                        <Button Content="Create Item" Command="{Binding CreateItemCommand}"
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                HorizontalAlignment="Stretch" Margin="0,8,0,0"/>
+
+                        <!-- Transfer selected item -->
+                        <Separator Margin="0,12"/>
+                        <TextBlock Text="📦 Transfer Selected Item" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                        <ComboBox x:Name="TransferLocationCombo" Margin="0,0,0,6">
+                            <ComboBoxItem Content="Showroom"/>
+                            <ComboBoxItem Content="Safe"/>
+                            <ComboBoxItem Content="Locker"/>
+                            <ComboBoxItem Content="Counter"/>
+                            <ComboBoxItem Content="Vault"/>
+                        </ComboBox>
+                        <Button Content="Transfer"
+                                Command="{Binding TransferStockCommand}"
+                                CommandParameter="{Binding SelectedItem.ItemId}"
+                                HorizontalAlignment="Stretch"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+
+        <!-- Pagination + Status -->
+        <Border Grid.Row="3" Background="#F5F5F5" BorderBrush="#E0E0E0" BorderThickness="0,1,0,0"
+                Padding="8,4" Margin="0,8,0,0">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <Button Content="◀ Prev" Command="{Binding PreviousPageCommand}" Margin="0,0,4,0"/>
+                    <TextBlock Text="{Binding CurrentPage, StringFormat=Page {0}}" VerticalAlignment="Center" Margin="4,0"/>
+                    <Button Content="Next ▶" Command="{Binding NextPageCommand}"/>
+                </StackPanel>
+                <ProgressBar IsIndeterminate="{Binding IsBusy}" Width="120" Height="8" VerticalAlignment="Center"
+                             Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}"
+                             DockPanel.Dock="Right" Margin="8,0"/>
+                <TextBlock Text="{Binding StatusMessage}" VerticalAlignment="Center"/>
+            </DockPanel>
+        </Border>
+    </Grid>
+</UserControl>

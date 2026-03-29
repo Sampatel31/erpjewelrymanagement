@@ -1,0 +1,37 @@
+<UserControl x:Class="ShingarERP.UI.Views.Accounting.AccountChartView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="900"
+             Background="White">
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,12">
+            <TextBlock Text="Chart of Accounts" FontSize="22" FontWeight="Bold" Foreground="#1F4975"/>
+            <TextBlock Text="Hierarchical view of all accounts in Shringar Jewellers ERP" FontSize="12" Foreground="#666"/>
+        </StackPanel>
+
+        <DataGrid Grid.Row="1" ItemsSource="{Binding Accounts}"
+                  AutoGenerateColumns="False" IsReadOnly="True"
+                  CanUserAddRows="False" GridLinesVisibility="Horizontal"
+                  RowBackground="White" AlternatingRowBackground="#F8FBFF">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Code"       Binding="{Binding AccountCode}"  Width="90"/>
+                <DataGridTextColumn Header="Account"    Binding="{Binding AccountName}"  Width="*"/>
+                <DataGridTextColumn Header="Type"       Binding="{Binding AccountType}"  Width="90"/>
+                <DataGridTextColumn Header="Group"      Binding="{Binding AccountGroup}" Width="100"/>
+                <DataGridTextColumn Header="Normal"     Binding="{Binding NormalBalance}" Width="70"/>
+                <DataGridTextColumn Header="Bal."       Binding="{Binding CurrentBalance, StringFormat=₹{0:N2}}" Width="120"/>
+                <DataGridCheckBoxColumn Header="Control" Binding="{Binding IsControl}"   Width="60"/>
+                <DataGridCheckBoxColumn Header="Posting" Binding="{Binding AllowPosting}" Width="60"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>
