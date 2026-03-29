@@ -21,8 +21,8 @@ namespace ShingarERP.Core.Models
         [MaxLength(50)] public string? EmployeeCode { get; set; }
         /// <summary>Experience in years.</summary>
         public int ExperienceYears { get; set; }
-        /// <summary>Performance rating 1-5.</summary>
-        [Column(TypeName = "decimal(3,2)")] public decimal PerformanceRating { get; set; } = 3;
+        /// <summary>Performance rating 1-5 (one decimal place, e.g. 3.5).</summary>
+        [Column(TypeName = "decimal(4,2)")] public decimal PerformanceRating { get; set; } = 3m;
         /// <summary>Availability status: Available/Busy/OnLeave/Inactive</summary>
         [MaxLength(20)] public string AvailabilityStatus { get; set; } = "Available";
         [Column(TypeName = "decimal(14,2)")] public decimal DailyRate { get; set; }
@@ -416,7 +416,7 @@ namespace ShingarERP.Core.Models
         [MaxLength(200)] public string? Skills { get; set; }
         [MaxLength(100)] public string? PaymentTerms { get; set; }
         [MaxLength(50)] public string? GSTNo { get; set; }
-        [Column(TypeName = "decimal(5,2)")] public decimal PerformanceScore { get; set; } = 3;
+        [Column(TypeName = "decimal(5,2)")] public decimal PerformanceScore { get; set; } = 3m;
         public bool IsActive { get; set; } = true;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
