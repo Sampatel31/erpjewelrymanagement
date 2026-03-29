@@ -84,6 +84,41 @@ namespace ShingarERP.Data
         public DbSet<DashboardWidget>  DashboardWidgets  { get; set; }
         public DbSet<KPI>              KPIs              { get; set; }
 
+        // Phase 2C – Manufacturing
+        public DbSet<Karigar>              Karigars              { get; set; }
+        public DbSet<KarigarSkill>         KarigarSkills         { get; set; }
+        public DbSet<KarigarPerformance>   KarigarPerformances   { get; set; }
+        public DbSet<JobCard>              JobCards              { get; set; }
+        public DbSet<JobCardStage>         JobCardStages         { get; set; }
+        public DbSet<JobCardHistory>       JobCardHistories      { get; set; }
+        public DbSet<JobCardLabor>         JobCardLabors         { get; set; }
+        public DbSet<JobCardMaterial>      JobCardMaterials      { get; set; }
+        // Phase 2C – Melting & Alloy
+        public DbSet<MeltingBatch>              MeltingBatches              { get; set; }
+        public DbSet<MeltingInput>              MeltingInputs               { get; set; }
+        public DbSet<AlloyComposition>          AlloyCompositions           { get; set; }
+        public DbSet<AlloyCompositionHistory>   AlloyCompositionHistories   { get; set; }
+        // Phase 2C – Quality Control
+        public DbSet<QCRecord>          QCRecords          { get; set; }
+        public DbSet<QCDefect>          QCDefects          { get; set; }
+        public DbSet<QCChecklist>       QCChecklists       { get; set; }
+        public DbSet<QCChecklistItem>   QCChecklistItems   { get; set; }
+        public DbSet<RejectionReason>   RejectionReasons   { get; set; }
+        public DbSet<AssayTest>         AssayTests         { get; set; }
+        // Phase 2C – Design
+        public DbSet<Design>               Designs              { get; set; }
+        public DbSet<DesignCollection>     DesignCollections    { get; set; }
+        public DbSet<DesignPhoto>          DesignPhotos         { get; set; }
+        public DbSet<DesignMakingCharge>   DesignMakingCharges  { get; set; }
+        public DbSet<DesignBOM>            DesignBOMs           { get; set; }
+        public DbSet<DesignHistory>        DesignHistories      { get; set; }
+        // Phase 2C – Sub-Contractor
+        public DbSet<SubContractor>      SubContractors      { get; set; }
+        public DbSet<Challan>            Challans            { get; set; }
+        public DbSet<ChallanLine>        ChallanLines        { get; set; }
+        public DbSet<ChallanReceival>    ChallanReceivals    { get; set; }
+        public DbSet<ChallanPayment>     ChallanPayments     { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
