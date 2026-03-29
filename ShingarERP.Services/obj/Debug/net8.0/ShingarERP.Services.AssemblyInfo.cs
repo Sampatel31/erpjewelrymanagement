@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ShingarERP.Services")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5c3c8da04c15af6f57ef187675c7c496355dcebd")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d13eaaa2d58bbf7eb6bb374f181c3bf1b10c20ef")]
 [assembly: System.Reflection.AssemblyProductAttribute("ShingarERP.Services")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ShingarERP.Services")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
