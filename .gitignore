@@ -1,0 +1,48 @@
+## .NET / C# / Visual Studio
+*.swp
+*.user
+*.suo
+*.sln.docstates
+*.userprefs
+.vs/
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+bin/
+obj/
+out/
+artifacts/
+
+# Build logs
+*.log
+*.binlog
+
+# NuGet packages
+.nuget/
+packages/
+*.nupkg
+*.snupkg
+
+# EF Core migrations temp
+.ef/
+
+# User-specific settings
+*.rsuser
+.vscode/settings.json
+*.DS_Store
+
+# Test results
+TestResults/
+*.coverage
+*.coveragexml
+.coverage/
+
+# Backup files
+*.bak
+*.tmp
+
+# Application secrets (NEVER commit real secrets)
+appsettings.*.json
+!appsettings.json
+secrets.json
