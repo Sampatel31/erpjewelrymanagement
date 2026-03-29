@@ -5,7 +5,7 @@ namespace ShingarERP.Data
 {
     /// <summary>
     /// Entity Framework Core DbContext for Shringar Jewellers ERP.
-    /// Covers Modules 01, 02, 04, 15, 22 (Phase 1).
+    /// Covers Modules 01, 02, 04, 15, 22 (Phase 1), Phase 2A, and Phase 2B.
     /// </summary>
     public class ShingarContext : DbContext
     {
@@ -49,6 +49,40 @@ namespace ShingarERP.Data
         public DbSet<BarcodeInfo>        BarcodeInfos        { get; set; }
         public DbSet<SalesHistory>       SalesHistories      { get; set; }
         public DbSet<LocationCapacity>   LocationCapacities  { get; set; }
+
+        // ── Phase 2B: Customer Lifecycle ────────────────────────────
+        public DbSet<CustomerKYC>            CustomerKYCs            { get; set; }
+        public DbSet<CustomerCreditLimit>    CustomerCreditLimits    { get; set; }
+        public DbSet<CustomerPreference>     CustomerPreferences     { get; set; }
+        public DbSet<LoyaltyProgram>         LoyaltyPrograms         { get; set; }
+        public DbSet<LoyaltyTransaction>     LoyaltyTransactions     { get; set; }
+        public DbSet<CustomerInteraction>    CustomerInteractions    { get; set; }
+
+        // ── Phase 2B: Advanced Accounting ───────────────────────────
+        public DbSet<GeneralLedger>               GeneralLedgers               { get; set; }
+        public DbSet<TrialBalance>                TrialBalances                { get; set; }
+        public DbSet<FinancialStatementTemplate>  FinancialStatementTemplates  { get; set; }
+        public DbSet<FinancialStatement>          FinancialStatements          { get; set; }
+        public DbSet<CostCenter>                  CostCenters                  { get; set; }
+        public DbSet<BudgetAllocation>            BudgetAllocations            { get; set; }
+        public DbSet<AuditLog>                    AuditLogs                    { get; set; }
+        public DbSet<TaxCalculation>              TaxCalculations              { get; set; }
+
+        // ── Phase 2B: Orders ─────────────────────────────────────────
+        public DbSet<SalesOrder>            SalesOrders            { get; set; }
+        public DbSet<SalesOrderLine>        SalesOrderLines        { get; set; }
+        public DbSet<SalesOrderApproval>    SalesOrderApprovals    { get; set; }
+        public DbSet<PurchaseOrder>         PurchaseOrders         { get; set; }
+        public DbSet<PurchaseOrderLine>     PurchaseOrderLines     { get; set; }
+        public DbSet<OrderFulfillment>      OrderFulfillments      { get; set; }
+        public DbSet<OrderReturn>           OrderReturns           { get; set; }
+        public DbSet<OrderPaymentSchedule>  OrderPaymentSchedules  { get; set; }
+
+        // ── Phase 2B: Reporting ──────────────────────────────────────
+        public DbSet<ReportTemplate>   ReportTemplates   { get; set; }
+        public DbSet<ReportSchedule>   ReportSchedules   { get; set; }
+        public DbSet<DashboardWidget>  DashboardWidgets  { get; set; }
+        public DbSet<KPI>              KPIs              { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -382,6 +416,302 @@ namespace ShingarERP.Data
                  .WithMany()
                  .HasForeignKey(x => x.CategoryId)
                  .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            // ── Phase 2B: CustomerKYC ─────────────────────────────────
+            modelBuilder.Entity<CustomerKYC>(e =>
+            {
+                e.HasIndex(x => x.CustomerId).IsUnique();
+                e.HasIndex(x => x.KYCStatus);
+                e.Property(x => x.AnnualIncome).HasPrecision(18, 2);
+
+                e.HasOne(x => x.Customer)
+                 .WithMany()
+                 .HasForeignKey(x => x.CustomerId)
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ── Phase 2B: CustomerCreditLimit ────────────────────────
+            modelBuilder.Entity<CustomerCreditLimit>(e =>
+            {
+                e.HasIndex(x => x.CustomerId).IsUnique();
+                e.Property(x => x.CreditLimit).HasPrecision(18, 2);
+                e.Property(x => x.UtilizedAmount).HasPrecision(18, 2);
+
+                e.HasOne(x => x.Customer)
+                 .WithMany()
+                 .HasForeignKey(x => x.CustomerId)
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ── Phase 2B: CustomerPreference ─────────────────────────
+            modelBuilder.Entity<CustomerPreference>(e =>
+            {
+                e.Property(x => x.MinPriceRange).HasPrecision(18, 2);
+                e.Property(x => x.MaxPriceRange).HasPrecision(18, 2);
+
+                e.HasOne(x => x.Customer)
+                 .WithMany()
+                 .HasForeignKey(x => x.CustomerId)
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ── Phase 2B: LoyaltyProgram ─────────────────────────────
+            modelBuilder.Entity<LoyaltyProgram>(e =>
+            {
+                e.HasIndex(x => x.CustomerId).IsUnique();
+
+                e.HasOne(x => x.Customer)
+                 .WithMany()
+                 .HasForeignKey(x => x.CustomerId)
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ── Phase 2B: LoyaltyTransaction ─────────────────────────
+            modelBuilder.Entity<LoyaltyTransaction>(e =>
+            {
+                e.HasOne(x => x.LoyaltyProgram)
+                 .WithMany(lp => lp.Transactions)
+                 .HasForeignKey(x => x.LoyaltyProgramId)
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ── Phase 2B: CustomerInteraction ────────────────────────
+            modelBuilder.Entity<CustomerInteraction>(e =>
+            {
+                e.HasOne(x => x.Customer)
+                 .WithMany()
+                 .HasForeignKey(x => x.CustomerId)
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ── Phase 2B: GeneralLedger ───────────────────────────────
+            modelBuilder.Entity<GeneralLedger>(e =>
+            {
+                e.HasIndex(x => x.AccountId);
+                e.HasIndex(x => x.PostingDate);
+                e.HasIndex(x => x.VoucherNo);
+                e.Property(x => x.DebitAmount).HasPrecision(18, 4);
+                e.Property(x => x.CreditAmount).HasPrecision(18, 4);
+                e.Property(x => x.RunningBalance).HasPrecision(18, 4);
+
+                e.HasOne(x => x.Account)
+                 .WithMany()
+                 .HasForeignKey(x => x.AccountId)
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ── Phase 2B: TrialBalance ────────────────────────────────
+            modelBuilder.Entity<TrialBalance>(e =>
+            {
+                e.Property(x => x.OpeningDebit).HasPrecision(18, 4);
+                e.Property(x => x.OpeningCredit).HasPrecision(18, 4);
+                e.Property(x => x.PeriodDebit).HasPrecision(18, 4);
+                e.Property(x => x.PeriodCredit).HasPrecision(18, 4);
+                e.Property(x => x.ClosingDebit).HasPrecision(18, 4);
+                e.Property(x => x.ClosingCredit).HasPrecision(18, 4);
+
+                e.HasOne(x => x.Account)
+                 .WithMany()
+                 .HasForeignKey(x => x.AccountId)
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ── Phase 2B: FinancialStatement ──────────────────────────
+            modelBuilder.Entity<FinancialStatement>(e =>
+            {
+                e.Property(x => x.TotalAssets).HasPrecision(18, 2);
+                e.Property(x => x.TotalLiabilities).HasPrecision(18, 2);
+                e.Property(x => x.NetProfit).HasPrecision(18, 2);
+
+                e.HasOne(x => x.Template)
+                 .WithMany()
+                 .HasForeignKey(x => x.TemplateId)
+                 .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            // ── Phase 2B: CostCenter ──────────────────────────────────
+            modelBuilder.Entity<CostCenter>(e =>
+            {
+                e.HasIndex(x => x.CostCenterCode).IsUnique();
+                e.Property(x => x.BudgetAmount).HasPrecision(18, 2);
+                e.Property(x => x.ActualAmount).HasPrecision(18, 2);
+
+                e.HasOne(x => x.ParentCostCenter)
+                 .WithMany(cc => cc.ChildCostCenters)
+                 .HasForeignKey(x => x.ParentCostCenterId)
+                 .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            // ── Phase 2B: BudgetAllocation ────────────────────────────
+            modelBuilder.Entity<BudgetAllocation>(e =>
+            {
+                e.Property(x => x.BudgetedAmount).HasPrecision(18, 2);
+                e.Property(x => x.ActualAmount).HasPrecision(18, 2);
+
+                e.HasOne(x => x.CostCenter)
+                 .WithMany()
+                 .HasForeignKey(x => x.CostCenterId)
+                 .OnDelete(DeleteBehavior.SetNull);
+
+                e.HasOne(x => x.Account)
+                 .WithMany()
+                 .HasForeignKey(x => x.AccountId)
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ── Phase 2B: AuditLog ────────────────────────────────────
+            modelBuilder.Entity<AuditLog>(e =>
+            {
+                e.HasIndex(x => new { x.EntityName, x.EntityId });
+                e.HasIndex(x => x.Timestamp);
+                e.HasIndex(x => x.UserId);
+            });
+
+            // ── Phase 2B: TaxCalculation ─────────────────────────────
+            modelBuilder.Entity<TaxCalculation>(e =>
+            {
+                e.Property(x => x.TaxableAmount).HasPrecision(18, 2);
+                e.Property(x => x.TaxRate).HasPrecision(5, 2);
+                e.Property(x => x.TaxAmount).HasPrecision(18, 2);
+                e.Property(x => x.CGSTAmount).HasPrecision(18, 2);
+                e.Property(x => x.SGSTAmount).HasPrecision(18, 2);
+                e.Property(x => x.IGSTAmount).HasPrecision(18, 2);
+                e.Property(x => x.TDSAmount).HasPrecision(18, 2);
+            });
+
+            // ── Phase 2B: SalesOrder ──────────────────────────────────
+            modelBuilder.Entity<SalesOrder>(e =>
+            {
+                e.HasIndex(x => x.OrderNo).IsUnique();
+                e.HasIndex(x => x.CustomerId);
+                e.HasIndex(x => x.Status);
+                e.HasIndex(x => x.OrderDate);
+                e.Property(x => x.TotalAmount).HasPrecision(18, 2);
+                e.Property(x => x.DiscountAmount).HasPrecision(18, 2);
+                e.Property(x => x.TaxAmount).HasPrecision(18, 2);
+                e.Property(x => x.NetAmount).HasPrecision(18, 2);
+
+                e.HasOne(x => x.Customer)
+                 .WithMany()
+                 .HasForeignKey(x => x.CustomerId)
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ── Phase 2B: SalesOrderLine ──────────────────────────────
+            modelBuilder.Entity<SalesOrderLine>(e =>
+            {
+                e.Property(x => x.UnitPrice).HasPrecision(18, 2);
+                e.Property(x => x.DiscountPercent).HasPrecision(5, 2);
+                e.Property(x => x.TaxPercent).HasPrecision(5, 2);
+
+                e.HasOne(x => x.SalesOrder)
+                 .WithMany(so => so.Lines)
+                 .HasForeignKey(x => x.SalesOrderId)
+                 .OnDelete(DeleteBehavior.Restrict);
+
+                e.HasOne(x => x.FinishedGood)
+                 .WithMany()
+                 .HasForeignKey(x => x.ItemId)
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ── Phase 2B: SalesOrderApproval ─────────────────────────
+            modelBuilder.Entity<SalesOrderApproval>(e =>
+            {
+                e.HasOne(x => x.SalesOrder)
+                 .WithMany(so => so.Approvals)
+                 .HasForeignKey(x => x.SalesOrderId)
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ── Phase 2B: PurchaseOrder ───────────────────────────────
+            modelBuilder.Entity<PurchaseOrder>(e =>
+            {
+                e.HasIndex(x => x.PONumber).IsUnique();
+                e.HasIndex(x => x.SupplierId);
+                e.HasIndex(x => x.Status);
+                e.Property(x => x.TotalAmount).HasPrecision(18, 2);
+                e.Property(x => x.TaxAmount).HasPrecision(18, 2);
+                e.Property(x => x.NetAmount).HasPrecision(18, 2);
+
+                e.HasOne(x => x.Supplier)
+                 .WithMany()
+                 .HasForeignKey(x => x.SupplierId)
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ── Phase 2B: PurchaseOrderLine ───────────────────────────
+            modelBuilder.Entity<PurchaseOrderLine>(e =>
+            {
+                e.Property(x => x.Quantity).HasPrecision(12, 4);
+                e.Property(x => x.UnitPrice).HasPrecision(18, 2);
+                e.Property(x => x.TaxPercent).HasPrecision(5, 2);
+                e.Property(x => x.LineTotal).HasPrecision(18, 2);
+                e.Property(x => x.ReceivedQuantity).HasPrecision(12, 4);
+
+                e.HasOne(x => x.PurchaseOrder)
+                 .WithMany(po => po.Lines)
+                 .HasForeignKey(x => x.PurchaseOrderId)
+                 .OnDelete(DeleteBehavior.Restrict);
+
+                e.HasOne(x => x.FinishedGood)
+                 .WithMany()
+                 .HasForeignKey(x => x.ItemId)
+                 .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            // ── Phase 2B: OrderFulfillment ────────────────────────────
+            modelBuilder.Entity<OrderFulfillment>(e =>
+            {
+                e.HasIndex(x => x.SalesOrderId).IsUnique();
+
+                e.HasOne(x => x.SalesOrder)
+                 .WithMany()
+                 .HasForeignKey(x => x.SalesOrderId)
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ── Phase 2B: OrderReturn ─────────────────────────────────
+            modelBuilder.Entity<OrderReturn>(e =>
+            {
+                e.HasIndex(x => x.ReturnNo).IsUnique();
+                e.Property(x => x.RefundAmount).HasPrecision(18, 2);
+
+                e.HasOne(x => x.SalesOrder)
+                 .WithMany()
+                 .HasForeignKey(x => x.SalesOrderId)
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ── Phase 2B: OrderPaymentSchedule ───────────────────────
+            modelBuilder.Entity<OrderPaymentSchedule>(e =>
+            {
+                e.Property(x => x.DueAmount).HasPrecision(18, 2);
+                e.Property(x => x.PaidAmount).HasPrecision(18, 2);
+
+                e.HasOne(x => x.SalesOrder)
+                 .WithMany(so => so.PaymentSchedules)
+                 .HasForeignKey(x => x.SalesOrderId)
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ── Phase 2B: ReportSchedule ─────────────────────────────
+            modelBuilder.Entity<ReportSchedule>(e =>
+            {
+                e.HasOne(x => x.Template)
+                 .WithMany()
+                 .HasForeignKey(x => x.TemplateId)
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // ── Phase 2B: KPI ─────────────────────────────────────────
+            modelBuilder.Entity<KPI>(e =>
+            {
+                e.HasIndex(x => x.KPICode).IsUnique();
+                e.Property(x => x.CurrentValue).HasPrecision(18, 4);
+                e.Property(x => x.TargetValue).HasPrecision(18, 4);
+                e.Property(x => x.PreviousValue).HasPrecision(18, 4);
             });
 
             // ── Seed data ────────────────────────────────────────────
