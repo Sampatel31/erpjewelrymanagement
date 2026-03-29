@@ -1,0 +1,173 @@
+<UserControl x:Class="ShingarERP.UI.Views.Inventory.MetalInventoryView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="700" d:DesignWidth="1100"
+             Background="White">
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Title + Alerts -->
+            <RowDefinition Height="Auto"/>
+            <!-- Current Rate bar -->
+            <RowDefinition Height="*"/>
+            <!-- Main content -->
+            <RowDefinition Height="Auto"/>
+            <!-- Status bar -->
+        </Grid.RowDefinitions>
+
+        <!-- ── Title row ─────────────────────────────────────────── -->
+        <DockPanel Grid.Row="0" LastChildFill="False" Margin="0,0,0,12">
+            <StackPanel DockPanel.Dock="Left">
+                <TextBlock Text="Gold &amp; Metal Inventory" FontSize="22" FontWeight="Bold" Foreground="#1F4975"/>
+                <TextBlock Text="Module 01 – Lot tracking, MCX rates, stock alerts" FontSize="12" Foreground="#666"/>
+            </StackPanel>
+
+            <!-- Low stock alert badge -->
+            <Border DockPanel.Dock="Right" Background="#FDECEA" BorderBrush="#E57373" BorderThickness="1"
+                    CornerRadius="4" Padding="10,4"
+                    Visibility="{Binding HasLowStockAlert, Converter={StaticResource BoolToVisibilityConverter}}">
+                <TextBlock Text="⚠ LOW STOCK ALERT" Foreground="#C62828" FontWeight="Bold"/>
+            </Border>
+
+            <Button DockPanel.Dock="Right" Content="🔄 Refresh" Margin="0,0,8,0"
+                    Command="{Binding LoadMetalsCommand}"
+                    Style="{StaticResource PrimaryButtonStyle}"/>
+        </DockPanel>
+
+        <!-- ── Current Rate bar ──────────────────────────────────── -->
+        <Border Grid.Row="1" Background="#E8F5E9" BorderBrush="#A5D6A7" BorderThickness="1"
+                CornerRadius="6" Padding="12,8" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="📈 Current Rate:" FontWeight="Bold" Foreground="#2E7D32" Margin="0,0,8,0"/>
+                <TextBlock Foreground="#2E7D32" FontSize="16" FontWeight="Bold">
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="₹{0:F2}/g  |  ₹{1:F2}/tola  |  MCX: ₹{2:F2}">
+                            <Binding Path="CurrentRate.RatePerGram" FallbackValue="--"/>
+                            <Binding Path="CurrentRate.RatePerTola" FallbackValue="--"/>
+                            <Binding Path="CurrentRate.MCXSpotRate" FallbackValue="--"/>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+                <TextBlock Text=" | Source: " Foreground="#555" Margin="8,0,0,0"/>
+                <TextBlock Text="{Binding CurrentRate.Source, FallbackValue=N/A}" Foreground="#555"/>
+                <TextBlock Text=" | Date: " Foreground="#555" Margin="8,0,0,0"/>
+                <TextBlock Text="{Binding CurrentRate.RateDate, StringFormat=dd-MM-yyyy, FallbackValue=N/A}" Foreground="#555"/>
+            </StackPanel>
+        </Border>
+
+        <!-- ── Main content (3 columns) ─────────────────────────── -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="220"/>
+                <!-- Metal list -->
+                <ColumnDefinition Width="*"/>
+                <!-- Lots grid -->
+                <ColumnDefinition Width="300"/>
+                <!-- Side forms -->
+            </Grid.ColumnDefinitions>
+
+            <!-- Metal List -->
+            <Border Grid.Column="0" BorderBrush="#DDD" BorderThickness="1" CornerRadius="6" Margin="0,0,8,0">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Text="Metals" FontWeight="Bold" Padding="8,6"
+                               Background="#F5F5F5" BorderBrush="#DDD" BorderThickness="0,0,0,1"/>
+                    <ListBox ItemsSource="{Binding Metals}"
+                             SelectedItem="{Binding SelectedMetal}"
+                             BorderThickness="0">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Margin="4,4">
+                                    <TextBlock Text="{Binding MetalType}" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{Binding PurityCode, StringFormat=Purity: {0}}" FontSize="11" Foreground="#666"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+            </Border>
+
+            <!-- Lots DataGrid -->
+            <Border Grid.Column="1" BorderBrush="#DDD" BorderThickness="1" CornerRadius="6" Margin="0,0,8,0">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Text="Purchase Lots" FontWeight="Bold" Padding="8,6"
+                               Background="#F5F5F5" BorderBrush="#DDD" BorderThickness="0,0,0,1"/>
+                    <DataGrid ItemsSource="{Binding MetalLots}" AutoGenerateColumns="False"
+                              IsReadOnly="True" CanUserAddRows="False" GridLinesVisibility="Horizontal"
+                              RowBackground="White" AlternatingRowBackground="#F8FBFF">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Lot No"    Binding="{Binding LotNumber}"          Width="110"/>
+                            <DataGridTextColumn Header="Supplier"  Binding="{Binding SupplierName}"       Width="*"/>
+                            <DataGridTextColumn Header="Gross (g)" Binding="{Binding GrossWeight, StringFormat=F3}" Width="90"/>
+                            <DataGridTextColumn Header="Net (g)"   Binding="{Binding NetWeight, StringFormat=F3}"   Width="90"/>
+                            <DataGridTextColumn Header="Remaining" Binding="{Binding RemainingWeight, StringFormat=F3}" Width="90"/>
+                            <DataGridTextColumn Header="Loss %"    Binding="{Binding MeltingLossPercent, StringFormat=F2}" Width="70"/>
+                            <DataGridTextColumn Header="Rate/g"    Binding="{Binding PurchaseRatePerGram, StringFormat=₹{0:F2}}" Width="90"/>
+                            <DataGridTextColumn Header="Total Cost" Binding="{Binding TotalCost, StringFormat=₹{0:F2}}" Width="100"/>
+                            <DataGridTextColumn Header="Date"      Binding="{Binding PurchaseDate, StringFormat=dd-MM-yyyy}" Width="90"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </Border>
+
+            <!-- Side forms panel -->
+            <StackPanel Grid.Column="2" Margin="0">
+
+                <!-- Add Rate Form -->
+                <Border BorderBrush="#DDD" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,8">
+                    <StackPanel>
+                        <TextBlock Text="📊 Update Today's Rate" FontWeight="Bold" Margin="0,0,0,8"/>
+                        <TextBlock Text="Metal" FontSize="11"/>
+                        <ComboBox ItemsSource="{Binding Metals}" SelectedValuePath="MetalId"
+                                  SelectedValue="{Binding NewRateRequest.MetalId}"
+                                  DisplayMemberPath="PurityCode" Margin="0,2,0,6"/>
+                        <TextBlock Text="Rate/gram (₹)" FontSize="11"/>
+                        <TextBox Text="{Binding NewRateRequest.RatePerGram, UpdateSourceTrigger=PropertyChanged}"
+                                 Margin="0,2,0,6"/>
+                        <TextBlock Text="MCX Spot Rate (₹)" FontSize="11"/>
+                        <TextBox Text="{Binding NewRateRequest.MCXSpotRate, UpdateSourceTrigger=PropertyChanged}"
+                                 Margin="0,2,0,6"/>
+                        <Button Content="Save Rate" Command="{Binding SaveMetalRateCommand}"
+                                Style="{StaticResource PrimaryButtonStyle}" HorizontalAlignment="Stretch" Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Add Lot Form -->
+                <Border BorderBrush="#DDD" BorderThickness="1" CornerRadius="6" Padding="12">
+                    <StackPanel>
+                        <TextBlock Text="➕ Add Purchase Lot" FontWeight="Bold" Margin="0,0,0,8"/>
+                        <TextBlock Text="Lot Number" FontSize="11"/>
+                        <TextBox Text="{Binding NewLotRequest.LotNumber, UpdateSourceTrigger=PropertyChanged}"
+                                 Margin="0,2,0,6"/>
+                        <TextBlock Text="Supplier ID" FontSize="11"/>
+                        <TextBox Text="{Binding NewLotRequest.SupplierId, UpdateSourceTrigger=PropertyChanged}"
+                                 Margin="0,2,0,6"/>
+                        <TextBlock Text="Gross Weight (g)" FontSize="11"/>
+                        <TextBox Text="{Binding NewLotRequest.GrossWeight, UpdateSourceTrigger=PropertyChanged}"
+                                 Margin="0,2,0,6"/>
+                        <TextBlock Text="Net Weight (g)" FontSize="11"/>
+                        <TextBox Text="{Binding NewLotRequest.NetWeight, UpdateSourceTrigger=PropertyChanged}"
+                                 Margin="0,2,0,6"/>
+                        <TextBlock Text="Purchase Rate/g (₹)" FontSize="11"/>
+                        <TextBox Text="{Binding NewLotRequest.PurchaseRatePerGram, UpdateSourceTrigger=PropertyChanged}"
+                                 Margin="0,2,0,6"/>
+                        <Button Content="Create Lot" Command="{Binding CreateMetalLotCommand}"
+                                Style="{StaticResource PrimaryButtonStyle}" HorizontalAlignment="Stretch" Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+
+        <!-- ── Status bar ────────────────────────────────────────── -->
+        <Border Grid.Row="3" Background="#F5F5F5" BorderBrush="#E0E0E0" BorderThickness="0,1,0,0" Padding="8,4" Margin="0,8,0,0">
+            <DockPanel>
+                <ProgressBar DockPanel.Dock="Right" IsIndeterminate="{Binding IsBusy}" Width="120" Height="8"
+                             Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                <TextBlock Text="{Binding StatusMessage}" VerticalAlignment="Center"/>
+            </DockPanel>
+        </Border>
+    </Grid>
+</UserControl>

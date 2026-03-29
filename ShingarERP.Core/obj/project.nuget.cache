@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "iNyt9fE1iMk=",
+  "success": true,
+  "projectFilePath": "/home/runner/work/erpjewelrymanagement/erpjewelrymanagement/ShingarERP.Core/ShingarERP.Core.csproj",
+  "expectedPackageFiles": [
+    "/home/runner/.nuget/packages/fluentvalidation/11.9.0/fluentvalidation.11.9.0.nupkg.sha512",
+    "/home/runner/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/8.0.0/microsoft.extensions.dependencyinjection.abstractions.8.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}
